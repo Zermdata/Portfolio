@@ -1,0 +1,9 @@
+Select *
+From Project..CovidDeaths
+Where continet is not null
+order by 3,4
+
+Select Location, date, total_cases, new_cases, total_deaths, population
+From Project..CovidDeaths
+Where continent is not null
+order by 1,2
