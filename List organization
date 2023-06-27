@@ -1,0 +1,43 @@
+import pandas as pd
+import glob
+
+# Function to read and process Excel files
+def process_excel_files(files):
+    result = []
+    for file in files:
+        # Load the first sheet of the Excel file
+        df = pd.read_excel(file, sheet_name=0)
+        
+        # Concatenate the three columns
+        concatenated_columns = df.iloc[:, 0] + df.iloc[:, 1] + df.iloc[:, 2]
+        
+        # Drop every other column
+        processed_columns = concatenated_columns.iloc[::2]
+        
+        result.extend(processed_columns.tolist())
+    
+    return result
+
+# Function to find differences between two lists
+def find_differences(list1, list2):
+    set1 = set(list1)
+    set2 = set(list2)
+    return set1.difference(set2)
+
+# List all Excel files in the directory
+excel_files = glob.glob("*.xlsx")  # Replace with the appropriate file extension if needed
+
+# Process the first set of files
+list1 = process_excel_files(excel_files)
+
+# Process the second set of files
+second_set_files = glob.glob("second_set/*.xlsx")  # Replace "second_set" with the appropriate directory name
+list2 = process_excel_files(second_set_files)
+
+# Find the differences between the two sets of lists
+differences = find_differences(list1, list2)
+
+# Print the results
+print("List 1:", list1)
+print("List 2:", list2)
+print("Differences:", differences)
