@@ -15,12 +15,22 @@ def concatenate_and_process_one_sheet(files):
     
     return result
 
-# List all Excel files in the directory
-excel_files_one_sheet = glob.glob("*.xlsx")  # Replace with the appropriate file extension if needed
+# List all Excel files for dataset NWM
+excel_files_nwm = glob.glob("nwm/*.xlsx")  # Replace "nwm" with the appropriate directory name for NWM dataset
 
-# Process datasets with one sheet
-datasets_one_sheet = concatenate_and_process_one_sheet(excel_files_one_sheet)
+# List all Excel files for dataset OSoc
+excel_files_osoc = glob.glob("osoc/*.xlsx")  # Replace "osoc" with the appropriate directory name for OSoc dataset
 
-# Export dataset with one sheet as CSV
-df_one_sheet = pd.DataFrame(datasets_one_sheet)
-df_one_sheet.to_csv("joined_dataset_one_sheet.csv", index=False)
+# Process dataset NWM
+datasets_one_sheet_nwm = concatenate_and_process_one_sheet(excel_files_nwm)
+
+# Export dataset NWM as CSV
+df_one_sheet_nwm = pd.DataFrame(datasets_one_sheet_nwm)
+df_one_sheet_nwm.to_csv("joined_dataset_one_sheet_nwm.csv", index=False)
+
+# Process dataset OSoc
+datasets_one_sheet_osoc = concatenate_and_process_one_sheet(excel_files_osoc)
+
+# Export dataset OSoc as CSV
+df_one_sheet_osoc = pd.DataFrame(datasets_one_sheet_osoc)
+df_one_sheet_osoc.to_csv("joined_dataset_one_sheet_osoc.csv", index=False)
