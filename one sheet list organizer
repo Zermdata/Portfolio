@@ -1,0 +1,26 @@
+import pandas as pd
+import glob
+
+# Function to concatenate and process Excel files with one sheet
+def concatenate_and_process_one_sheet(files):
+    result = []
+    for file in files:
+        # Load the Excel file
+        df = pd.read_excel(file)
+        
+        # Concatenate the first three columns
+        concatenated_columns = df.iloc[:, 0] + df.iloc[:, 1] + df.iloc[:, 2]
+        
+        result.extend(concatenated_columns.tolist())
+    
+    return result
+
+# List all Excel files in the directory
+excel_files_one_sheet = glob.glob("*.xlsx")  # Replace with the appropriate file extension if needed
+
+# Process datasets with one sheet
+datasets_one_sheet = concatenate_and_process_one_sheet(excel_files_one_sheet)
+
+# Export dataset with one sheet as CSV
+df_one_sheet = pd.DataFrame(datasets_one_sheet)
+df_one_sheet.to_csv("joined_dataset_one_sheet.csv", index=False)
