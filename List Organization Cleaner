@@ -1,0 +1,36 @@
+import pandas as pd
+import glob
+
+# Function to concatenate and process Excel files
+def concatenate_and_process(files):
+    result_a = []
+    result_b = []
+    for file in files:
+        # Load the Excel file
+        xls = pd.ExcelFile(file)
+        
+        # Process Sheet A
+        df_a = xls.parse(0)  # Assuming Sheet A is at index 0
+        concatenated_columns_a = df_a.iloc[:, 0] + df_a.iloc[:, 1] + df_a.iloc[:, 2]
+        result_a.extend(concatenated_columns_a.tolist())
+        
+        # Process Sheet B
+        df_b = xls.parse(1)  # Assuming Sheet B is at index 1
+        concatenated_columns_b = df_b.iloc[:, 0] + df_b.iloc[:, 1] + df_b.iloc[:, 2]
+        result_b.extend(concatenated_columns_b.tolist())
+    
+    return result_a, result_b
+
+# List all Excel files in the directory
+excel_files = glob.glob("*.xlsx")  # Replace with the appropriate file extension if needed
+
+# Process datasets for Sheet A and Sheet B
+sheet_a_datasets, sheet_b_datasets = concatenate_and_process(excel_files)
+
+# Export Sheet A dataset as CSV
+sheet_a_df = pd.DataFrame(sheet_a_datasets)
+sheet_a_df.to_csv("sheet_a_dataset.csv", index=False)
+
+# Export Sheet B dataset as CSV
+sheet_b_df = pd.DataFrame(sheet_b_datasets)
+sheet_b_df.to_csv("sheet_b_dataset.csv", index=False)
