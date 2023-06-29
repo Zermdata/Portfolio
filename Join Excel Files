@@ -1,0 +1,20 @@
+import pandas as pd
+
+def join_excel_files(file_list):
+    combined_data = pd.concat([pd.read_excel(file) for file in file_list])
+    return combined_data
+
+def concatenate_columns(data):
+    data.loc[:, 0:3] = data.loc[:, 0:3].apply(lambda x: ",".join(x), axis=1)
+    return data
+
+def export_csv(data, sheet_name):
+    data.to_csv(f"{sheet_name}.csv")
+
+if __name__ == "__main__":
+    file_list = os.listdir(".")
+    file_list = [file for file in file_list if file.endswith(".xlsx")]
+    combined_data = join_excel_files(file_list)
+    combined_data = concatenate_columns(combined_data)
+    export_csv(combined_data[0:len(combined_data) // 2], "sheet1")
+    export_csv(combined_data[len(combined_data) // 2:], "sheet2")
