@@ -1,0 +1,33 @@
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('twitter_samples')
+
+from nltk.corpus import stopwords
+from nltk import classify
+from nltk import sentiment
+from nltk.sentiment import SentimentIntensityAnalyzer
+from nltk.tokenize import word_tokenize
+
+stop_words = set(stopwords.words("spanish"))
+
+def preprocess_text(text):
+    tokens = word_tokenize(text.lower())
+    tokens = [token for token in tokens if token.isalpha()]
+    tokens = [token for token in tokens if token not in stop_words]
+    return tokens
+
+sia = SentimentIntensityAnalyzer()
+
+def analyze_sentiment(text):
+    sentiment_score = sia.polarity_scores(text)["compound"]
+    if sentiment_score >= 0.05:
+        return "Positive"
+    elif sentiment_score <= -0.05:
+        return "Negative"
+    else:
+        return "Neutral"
+
+text = "This is a great movie!"
+sentiment = analyze_sentiment(text)
+print(sentiment)
