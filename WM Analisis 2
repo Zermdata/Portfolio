@@ -1,0 +1,73 @@
+import pandas as pd
+from tqdm import tqdm
+
+# Dictionary to store data for the first set of files
+altas_dict = {}
+
+# Dictionary to store data for the second set of files
+tiendas_dict = {}
+
+# List of file paths for the first set of files
+file_paths1 = [
+    "path/to/file1_1.xlsx",
+    "path/to/file1_2.xlsx",
+    # Add more file paths as needed for the first set of files
+]
+
+# List of file paths for the second set of files
+file_paths2 = [
+    "path/to/file2_1.xlsx",
+    "path/to/file2_2.xlsx",
+    # Add more file paths as needed for the second set of files
+]
+
+# Iterate over the first set of files
+for file_path1 in file_paths1:
+    df1 = pd.read_excel(file_path1)
+    key_column = df1["Soc"] + df1["Activo fijo"] + df1["SN"]
+    altas_dict.update(zip(key_column, [file_path1] * len(key_column)))
+
+# Iterate over the second set of files
+for file_path2 in file_paths2:
+    df2 = pd.read_excel(file_path2)
+    key_column = df2["Soc"] + df2["Activo fijo"] + df2["SN"]
+    tiendas_dict.update(zip(key_column, [file_path2] * len(key_column)))
+
+# Compare the keys in both dictionaries
+common_keys = set(altas_dict.keys()) & set(tiendas_dict.keys())
+
+# Create an empty DataFrame to store the comparison results
+comparison_results = pd.DataFrame(columns=["Common Key", "File Path 1", "File Path 2", "Alta == Costo de Adq & Prod", "Fe.capit. == Fecha de Capit."])
+
+# Compare the specified columns for the common keys
+for key in tqdm(common_keys, desc="Comparing Files", unit="file"):
+    file_path1 = altas_dict[key]
+    file_path2 = tiendas_dict[key]
+    df1 = pd.read_excel(file_path1)
+    df2 = pd.read_excel(file_path2)
+
+    alta_column = df1["Alta"]
+    fe_capit_column = df1["Fe.capit."]
+    costo_adq_column = df2["Costo de Adq & Prod"]
+    fecha_capit_column = df2["Fecha de Capit."]
+
+    # Compare "Alta" with "Costo de Adq & Prod"
+    alta_costo_adq_comparison = alta_column.equals(costo_adq_column)
+
+    # Compare "Fe.capit." with "Fecha de Capit."
+    fe_capit_fecha_capit_comparison = fe_capit_column.equals(fecha_capit_column)
+
+    # Add the comparison results to the DataFrame
+    comparison_results = comparison_results.append({
+        "Common Key": key,
+        "File Path 1": file_path1,
+        "File Path 2": file_path2,
+        "Alta == Costo de Adq & Prod": alta_costo_adq_comparison,
+        "Fe.capit. == Fecha de Capit.": fe_capit_fecha_capit_comparison
+    }, ignore_index=True)
+
+# Save the comparison results to an Excel file
+output_file = "comparison_results.xlsx"  # Specify the output file path
+comparison_results.to_excel(output_file, index=False)
+
+print("Comparison results saved successfully!")

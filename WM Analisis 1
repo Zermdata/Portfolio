@@ -67,4 +67,4 @@ for key in tqdm(common_keys, desc="Comparando archivos", unit="archivo"):
     }, ignore_index=True)
 
 # Guardar los resultados de la comparación en un archivo Excel
-output_file = "resultados_comparacion
+output_file = "resultados_comparacion.xlsx"
