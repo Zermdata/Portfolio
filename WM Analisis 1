@@ -1,0 +1,70 @@
+import pandas as pd
+from tqdm import tqdm
+
+# Diccionario para almacenar los datos del primer conjunto de archivos
+altas_dict = {}
+
+# Diccionario para almacenar los datos del segundo conjunto de archivos
+tiendas_dict = {}
+
+# Lista de rutas de archivo para el primer conjunto de archivos
+file_paths1 = [
+    "ruta/hacia/archivo1_1.xlsx",
+    "ruta/hacia/archivo1_2.xlsx",
+    # Agrega más rutas de archivo según sea necesario para el primer conjunto de archivos
+]
+
+# Lista de rutas de archivo para el segundo conjunto de archivos
+file_paths2 = [
+    "ruta/hacia/archivo2_1.xlsx",
+    "ruta/hacia/archivo2_2.xlsx",
+    # Agrega más rutas de archivo según sea necesario para el segundo conjunto de archivos
+]
+
+# Iterar sobre el primer conjunto de archivos
+for file_path1 in file_paths1:
+    df1 = pd.read_excel(file_path1)
+    key_column = df1["Soc"] + df1["Activo fijo"] + df1["SN"]
+    altas_dict.update(zip(key_column, [file_path1] * len(key_column)))
+
+# Iterar sobre el segundo conjunto de archivos
+for file_path2 in file_paths2:
+    df2 = pd.read_excel(file_path2)
+    key_column = df2["Soc"] + df2["Activo fijo"] + df2["SN"]
+    tiendas_dict.update(zip(key_column, [file_path2] * len(key_column)))
+
+# Comparar las claves en ambos diccionarios
+common_keys = set(altas_dict.keys()) & set(tiendas_dict.keys())
+
+# Crear un DataFrame vacío para almacenar los resultados de la comparación
+comparison_results = pd.DataFrame(columns=["Clave común", "Ruta de archivo 1", "Ruta de archivo 2", "Alta == Costo de Adq & Prod", "Fe.capit. == Fecha de Capit."])
+
+# Comparar las columnas especificadas para las claves comunes
+for key in tqdm(common_keys, desc="Comparando archivos", unit="archivo"):
+    file_path1 = altas_dict[key]
+    file_path2 = tiendas_dict[key]
+    df1 = pd.read_excel(file_path1)
+    df2 = pd.read_excel(file_path2)
+
+    alta_column = df1["Alta"]
+    fe_capit_column = df1["Fe.capit."]
+    costo_adq_column = df2["Costo de Adq & Prod"]
+    fecha_capit_column = df2["Fecha de Capit."]
+
+    # Comparar "Alta" con "Costo de Adq & Prod"
+    alta_costo_adq_comparison = alta_column.equals(costo_adq_column)
+
+    # Comparar "Fe.capit." con "Fecha de Capit."
+    fe_capit_fecha_capit_comparison = fe_capit_column.equals(fecha_capit_column)
+
+    # Agregar los resultados de la comparación al DataFrame
+    comparison_results = comparison_results.append({
+        "Clave común": key,
+        "Ruta de archivo 1": file_path1,
+        "Ruta de archivo 2": file_path2,
+        "Alta == Costo de Adq & Prod": alta_costo_adq_comparison,
+        "Fe.capit. == Fecha de Capit.": fe_capit_fecha_capit_comparison
+    }, ignore_index=True)
+
+# Guardar los resultados de la comparación en un archivo Excel
+output_file = "resultados_comparacion
