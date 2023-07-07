@@ -1,0 +1,56 @@
+import pandas as pd
+from tqdm import tqdm
+
+# Provide the file paths of the file sets you want to compare
+file_set1 = ['file1_2021.xlsx', 'file2_2021.xlsx', ..., 'file14_2021.xlsx']
+file_set2 = ['file1_2022.xlsx', 'file2_2022.xlsx', ..., 'file14_2022.xlsx']
+
+def compare_files(file_set1, file_set2):
+    # Dictionary to store the data from file set 1
+    data_dict_1 = {}
+
+    # Read file set 1 and populate the dictionary
+    for file in tqdm(file_set1, desc="Reading 2021 files"):
+        year = file[-8:-4]  # Extract year from the filename
+        df = pd.read_excel(file)
+        df['Key'] = df['Sociedad'] + df['Numero de activo'] + df['Subnumero AF']
+        df.set_index('Key', inplace=True)
+        df.rename(columns={'Costo  de Adq & Prod': year}, inplace=True)
+        df.drop(['Sociedad', 'Numero de activo', 'Subnumero AF'], axis=1, inplace=True)
+        data_dict_1[year] = df
+
+    # Dictionary to store the data from file set 2
+    data_dict_2 = {}
+
+    # Read file set 2 and populate the dictionary
+    for file in tqdm(file_set2, desc="Reading 2022 files"):
+        year = file[-8:-4]  # Extract year from the filename
+        df = pd.read_excel(file)
+        df['Key'] = df['Sociedad'] + df['Numero de activo'] + df['Subnumero AF']
+        df.set_index('Key', inplace=True)
+        df.rename(columns={'Costo  de Adq & Prod': year}, inplace=True)
+        df.drop(['Sociedad', 'Numero de activo', 'Subnumero AF'], axis=1, inplace=True)
+        data_dict_2[year] = df
+
+    # Combine the dataframes and compare the amounts
+    combined_dict = {**data_dict_1, **data_dict_2}
+    output_data = []
+
+    for key, df_dict in tqdm(combined_dict.items(), desc="Comparing files"):
+        if len(df_dict) > 1:  # Key present in both file sets
+            years = list(df_dict.keys())
+            df1, df2 = list(df_dict.values())
+            merged_df = pd.merge(df1, df2, on='Key', how='outer')
+            merged_df.fillna(0, inplace=True)
+            merged_df['Diferencia'] = merged_df[years[0]] - merged_df[years[1]]
+            merged_df['Estatus'] = merged_df['Diferencia'].apply(lambda x: 'bajas' if x > 0 else 'altas')
+            output_data.append(merged_df)
+
+    # Concatenate the output dataframes
+    final_output = pd.concat(output_data, ignore_index=True, sort=False)
+
+    # Export the results to Excel
+    with pd.ExcelWriter('Analisis 3 resultados.xlsx') as writer:
+        final_output.to_excel(writer, sheet_name='Resultados', index=False)
+
+compare_files(file_set1, file_set2)
