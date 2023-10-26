@@ -1,0 +1,92 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+from statsmodels.tsa.arima_model import ARIMA
+from statsmodels.tsa.arima.model import ARIMAResults
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
+
+# Function to calculate MAE and MAPE
+def evaluate_forecast(y_true, y_pred):
+    mae = mean_absolute_error(y_true, y_pred)
+    mape = mean_absolute_percentage_error(y_true, y_pred)
+    return mae, mape
+
+# Function to forecast using Exponential Smoothing
+def forecast_exponential_smoothing(data, alpha, beta, phi, periods):
+    model = ExponentialSmoothing(data, trend="add", seasonal="add", seasonal_periods=phi)
+    fit = model.fit(smoothing_level=alpha, smoothing_slope=beta)
+    forecast = fit.forecast(periods)
+    return forecast
+
+# Function to forecast using ARIMA
+def forecast_arima(data, order, periods):
+    model = ARIMA(data, order=order)
+    fit = model.fit()
+    forecast = fit.forecast(steps=periods)
+    return forecast
+
+# Function to forecast using Moving Average
+def forecast_moving_average(data, window, periods):
+    forecast = data.rolling(window=window).mean().iloc[-1] * np.ones(periods)
+    return forecast
+
+# Input parameters
+data = pd.Series([10, 12, 15, 14, 16, 18, 20, 22, 25, 24, 26, 28])
+periods = int(input("Enter the number of periods to forecast: "))
+
+# Exponential Smoothing parameters
+alpha = float(input("Enter alpha for Exponential Smoothing: "))
+beta = float(input("Enter beta for Exponential Smoothing: "))
+phi = int(input("Enter seasonal period (phi) for Exponential Smoothing: "))
+
+# ARIMA parameters
+p = int(input("Enter the autoregressive order (p) for ARIMA: "))
+d = int(input("Enter the differencing order (d) for ARIMA: "))
+q = int(input("Enter the moving average order (q) for ARIMA: "))
+
+# Moving Average parameters
+window = int(input("Enter the window size for Moving Average: "))
+
+# Perform forecasts
+exp_smooth_forecast = forecast_exponential_smoothing(data, alpha, beta, phi, periods)
+arima_forecast = forecast_arima(data, order=(p, d, q), periods=periods)
+ma_forecast = forecast_moving_average(data, window, periods)
+
+# Evaluate the forecasts
+true_values = data[-periods:]
+mae_exp_smooth, mape_exp_smooth = evaluate_forecast(true_values, exp_smooth_forecast)
+mae_arima, mape_arima = evaluate_forecast(true_values, arima_forecast)
+mae_ma, mape_ma = evaluate_forecast(true_values, ma_forecast)
+
+# Compile model evaluation metrics
+evaluation_metrics = {
+    "Exponential Smoothing": {"MAE": mae_exp_smooth, "MAPE": mape_exp_smooth},
+    "ARIMA": {"MAE": mae_arima, "MAPE": mape_arima},
+    "Moving Average": {"MAE": mae_ma, "MAPE": mape_ma},
+}
+
+# Determine the flag based on evaluation metrics
+flag = {}
+for model, metrics in evaluation_metrics.items():
+    if metrics["MAE"] < threshold_mae and metrics["MAPE"] < threshold_mape:
+        flag[model] = "Good"
+    elif metrics["MAE"] < threshold_mae or metrics["MAPE"] < threshold_mape:
+        flag[model] = "Good Enough"
+    else:
+        flag[model] = "Bad"
+
+# Print evaluation metrics and flag
+for model, metrics in evaluation_metrics.items():
+    print(f"{model} - MAE: {metrics['MAE']}, MAPE: {metrics['MAPE']}, Flag: {flag[model]}")
+
+# Plot the forecasts
+plt.figure(figsize=(12, 6))
+plt.plot(true_values, label="True Values")
+plt.plot(exp_smooth_forecast, label="Exponential Smoothing Forecast")
+plt.plot(arima_forecast, label="ARIMA Forecast")
+plt.plot(ma_forecast, label="Moving Average Forecast")
+plt.legend()
+plt.title("Forecast Comparison")
+plt.show()
+
