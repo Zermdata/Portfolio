@@ -1,0 +1,33 @@
+import numpy as np
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+# Generate sample data
+np.random.seed(0)
+X = np.random.randn(100, 2) # 100 data points with 2 features
+
+# Visualize the data
+plt.scatter(X[:, 0], X[:, 1], s=50, cmap='viridis')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title('Original Data Points')
+plt.show()
+
+# Define the number of clusters
+k = 3
+
+# Initialize KMeans object and fit the data
+kmeans = KMeans(n_clusters=k)
+kmeans.fit(X)
+
+# Get cluster centroids and labels
+centroids = kmeans.cluster_centers_
+labels = kmeans.labels_
+
+# Visualize the clusters and centroids
+plt.scatter(X[:, 0], X[:, 1], c=labels, s=50, cmap='viridis', alpha=0.5)
+plt.scatter(centroids[:, 0], centroids[:, 1], c='red', s=200, marker='x')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title('Clustered Data Points with Centroids')
+plt.show()
