@@ -1,0 +1,20 @@
+-- Step 1: Gather and preprocess time-series data
+CREATE TEMPORARY TABLE IF NOT EXISTS time_series_data AS (
+    SELECT 
+        date,
+        SUM(sales_amount) AS total_sales
+    FROM 
+        sales_data
+    GROUP BY 
+        date
+    ORDER BY 
+        date
+);
+
+-- Step 2: Calculate moving average using SQL window functions
+SELECT 
+    date,
+    total_sales,
+    AVG(total_sales) OVER (ORDER BY date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS moving_avg_sales
+FROM 
+    time_series_data;
